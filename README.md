@@ -13,7 +13,7 @@ L'application distingue deux rôles principaux :
 L'architecture repose sur le découpage en micro-services pour assurer la scalabilité et la robustesse du système.
 
 ### 🗺️ Schéma d'Architecture
-![Architecture Globale](file:///C:/Users/GigaLap/.gemini/antigravity/brain/501841d3-649e-4a1b-962f-1a860bdb6224/uploaded_image_1_1768180325453.png)
+<img width="1115" height="686" alt="Capture d&#39;écran 2026-01-12 002551" src="https://github.com/user-attachments/assets/0fe7ac3d-90ef-42f0-898e-79f1a7e782e1" />
 
 ### 🧩 Composants Principaux
 - **API Gateway (Port 8086)** : Point d'entrée unique, gère le routage et la validation centrale des tokens JWT.
@@ -27,7 +27,7 @@ L'architecture repose sur le découpage en micro-services pour assurer la scalab
 ## 🔐 Modèle de Données et Rôles
 Le système suit une hiérarchie stricte basée sur les rôles extraits du token Keycloak.
 
-![Modèle de Classes et Rôles](file:///C:/Users/GigaLap/.gemini/antigravity/brain/501841d3-649e-4a1b-962f-1a860bdb6224/uploaded_image_2_1768180325453.png)
+<img width="626" height="593" alt="Capture d&#39;écran 2026-01-11 235605" src="https://github.com/user-attachments/assets/f0076989-a3a6-4f5d-ad7d-b67e8f3256ec" />
 
 ### 👥 Capacités par Rôle
 | Fonctionnalité | CLIENT | ADMIN |
