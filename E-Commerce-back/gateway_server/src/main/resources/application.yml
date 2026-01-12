@@ -1,0 +1,38 @@
+server:
+  port: 8086
+  error:
+    include-message: always
+
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.http.server.reactive: DEBUG
+    org.springframework.web.reactive: DEBUG
+    reactor.netty: DEBUG
+
+spring:
+  application:
+    name: api-gateway
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/Ecommerce-Realm
+
+  cloud:
+    gateway:
+      routes:
+        - id: product-service
+          uri: http://127.0.0.1:8083
+          predicates:
+            - Path=/products/**, /products
+          filters:
+            - TokenRelay
+
+        - id: order-service
+          uri: http://127.0.0.1:8082
+          predicates:
+            - Path=/orders/**, /orders
+          filters:
+            - TokenRelay

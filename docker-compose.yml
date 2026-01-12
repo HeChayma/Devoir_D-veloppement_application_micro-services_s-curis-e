@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  # 1. Database
+  db:
+    image: mysql:8.0
+    container_name: ecom-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # Initialization script to create multiple databases
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - ecom-network
+
+  # 2. Keycloak
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.1
+    container_name: ecom-keycloak
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB: dev-file
+      KC_HTTP_ENABLED: 'true'
+      KC_HOSTNAME_STRICT: 'false'
+    ports:
+      - "8080:8080"
+    command: start-dev
+    networks:
+      - ecom-network
+
+  # 3. Micro-service Produit
+  products-service:
+    build:
+      context: ./E-Commerce-back/Products-Service
+    container_name: product-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/products_db?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/Ecommerce-Realm
+    depends_on:
+      - db
+      - keycloak
+    networks:
+      - ecom-network
+
+  # 4. Micro-service Commande
+  orders-service:
+    build:
+      context: ./E-Commerce-back/Orders-Service
+    container_name: order-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/orders_db?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/Ecommerce-Realm
+      PRODUCTS_SERVICE_URL: http://products-service:8083
+    depends_on:
+      - db
+      - keycloak
+    networks:
+      - ecom-network
+
+  # 5. API Gateway
+  gateway:
+    build:
+      context: ./E-Commerce-back/gateway_server
+    container_name: gateway-server
+    ports:
+      - "8086:8086"
+    environment:
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/Ecommerce-Realm
+      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://products-service:8083
+      SPRING_CLOUD_GATEWAY_ROUTES_1_URI: http://orders-service:8082
+    depends_on:
+      - products-service
+      - orders-service
+      - keycloak
+    networks:
+      - ecom-network
+
+  # 6. Frontend React
+  frontend:
+    build:
+      context: ./E-Commerce-front
+    container_name: ecommerce-front
+    ports:
+      - "3000:80"
+    depends_on:
+      - gateway
+    networks:
+      - ecom-network
+
+networks:
+  ecom-network:
+    driver: bridge
+
+volumes:
+  mysql-data:

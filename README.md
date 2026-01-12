@@ -1,122 +1,69 @@
-# 📚 Application E-Learning sécurisée avec Keycloak, React et Spring Boot
+# 🛒 Plateforme E-Commerce Micro-Services Sécurisée
 
 ## 🧭 Vue globale du projet
+Ce projet est une plateforme **E-Commerce haut de gamme** basée sur une architecture **micro-services** moderne. Elle intègre une gestion complète des produits et des commandes, sécurisée par **Keycloak** via des tokens **JWT**.
 
-Ce projet consiste à développer une **application E-learning sécurisée** permettant de gérer
-l’authentification et l’autorisation des utilisateurs à l’aide de **Keycloak**, en respectant
-les standards de sécurité modernes.
-
-L’application propose deux types d’utilisateurs :
-
-- 🧑‍💼 **Administrateur** : gestion des cours (création, administration)
-- 🎓 **Étudiant** : consultation des cours et des informations pédagogiques
-
-La gestion de l’authentification est **entièrement déléguée à Keycloak**, afin de libérer
-l’application des responsabilités liées à la sécurité.
+L'application distingue deux rôles principaux :
+- 🧑‍💼 **ADMIN** : Gestion du catalogue (Ajout, Modification, Suppression de produits) et validation des commandes clients.
+- 🛍️ **CLIENT** : Consultation du catalogue, gestion du profil personnel et passage de commandes.
 
 ---
 
-## 🎯 Objectifs du projet
+## 🏗️ Architecture Technique
+L'architecture repose sur le découpage en micro-services pour assurer la scalabilité et la robustesse du système.
 
-Les objectifs principaux de ce projet sont :
+### 🗺️ Schéma d'Architecture
+![Architecture Globale](file:///C:/Users/GigaLap/.gemini/antigravity/brain/501841d3-649e-4a1b-962f-1a860bdb6224/uploaded_image_1_1768180325453.png)
 
-- 🔐 Appliquer le principe **OpenID Connect**
-- 🔁 Comprendre la délégation de l’authentification à une entité externe (Keycloak)
-- 🪪 Mettre en œuvre une **authentification par token (JWT)**
-- 👥 Gérer les **rôles des utilisateurs** via Keycloak (Admin / Student)
-- 🔍 Comprendre le **processus global d’authentification et d’autorisation**
-- ✅ Vérifier l’**identité de l’utilisateur à partir du token**
-- 🧑‍💼 Faciliter l’accès de l’administrateur à la gestion des cours
-- 🎓 Faciliter l’accès de l’étudiant à la consultation des cours
-
----
-
-## 🗺️ Architecture générale du projet
-
-Le projet repose sur une architecture **Front-End / Back-End sécurisée par Keycloak** :
-
-1. L’utilisateur accède à l’application via le Front-End (React)
-2. Le Front-End redirige l’utilisateur vers Keycloak pour l’authentification
-3. Keycloak authentifie l’utilisateur et génère un **token JWT**
-4. Le token est renvoyé au Front-End
-5. Le Front-End envoie le token au Back-End (Spring Boot)
-6. Le Back-End vérifie le token et autorise l’accès selon le rôle de l’utilisateur
-
-📌 *Schéma global du projet* :
-<img width="526" height="264" alt="image" src="https://github.com/user-attachments/assets/1a268935-27cd-4812-9ccb-28a84c4b3e7c" />
+### 🧩 Composants Principaux
+- **API Gateway (Port 8086)** : Point d'entrée unique, gère le routage et la validation centrale des tokens JWT.
+- **Micro-Service Produits (Port 8083)** : Gestion du catalogue et des stocks (Stockage : MySQL).
+- **Micro-Service Commandes (Port 8082)** : Gestion des ventes et historique client (Stockage : MySQL).
+- **Keycloak (Port 8080)** : Serveur d'Identité (IdP) gérant OAuth2 et OpenID Connect.
+- **Frontend React (Port 3000)** : Interface utilisateur moderne et réactive.
 
 ---
 
-## 🔁 Flux d’authentification
+## 🔐 Modèle de Données et Rôles
+Le système suit une hiérarchie stricte basée sur les rôles extraits du token Keycloak.
 
-- Redirection de l’utilisateur vers la page de login Keycloak
-- Authentification de l’utilisateur
-- Génération du token JWT
-- Envoi du token au Back-End
-- Vérification du token
-- Extraction de l’identité et du rôle de l’utilisateur
-- Autorisation ou refus d’accès aux ressources
+![Modèle de Classes et Rôles](file:///C:/Users/GigaLap/.gemini/antigravity/brain/501841d3-649e-4a1b-962f-1a860bdb6224/uploaded_image_2_1768180325453.png)
 
----
-
-## 🧩 Composants du projet
-
-### 🔑 Keycloak
-
-Keycloak est utilisé comme **serveur d’authentification et d’autorisation**.  
-Il permet de :
-
-- Gérer les utilisateurs
-- Gérer les rôles (Admin / Student)
-- Authentifier les utilisateurs
-- Générer des tokens JWT
-- Centraliser la sécurité de l’application
+### 👥 Capacités par Rôle
+| Fonctionnalité | CLIENT | ADMIN |
+| :--- | :---: | :---: |
+| Lister les produits | ✅ | ✅ |
+| Voir son profil | ✅ | ✅ |
+| Passer une commande | ✅ | ❌ |
+| Voir ses commandes | ✅ | ❌ |
+| Ajouter/Supprimer des produits | ❌ | ✅ |
+| Valider les commandes globales | ❌ | ✅ |
 
 ---
 
-### ⚙️ Spring Boot (Back-End)
+## 🚀 Déploiement avec Docker
+La plateforme est entièrement conteneurisée pour un déploiement simplifié.
 
-Le Back-End est développé avec **Spring Boot** et permet de :
+### Prérequis
+- Docker & Docker Compose installés.
 
-- Vérifier la validité du token JWT
-- Extraire l’identité de l’utilisateur à partir du token
-- Extraire les rôles associés à l’utilisateur
-- Protéger les endpoints selon les rôles
-- Fournir les données nécessaires au Front-End
+### Lancement
+```bash
+# À la racine du projet
+docker-compose up --build
+```
 
----
-
-### 💻 React (Front-End)
-
-Le Front-End est développé avec **React** et permet de :
-
-- Afficher l’interface utilisateur
-- Rediriger l’utilisateur vers Keycloak pour l’authentification
-- Stocker et transmettre le token JWT
-- Afficher une interface différente selon le rôle :
-  - Interface Administrateur
-  - Interface Étudiant
+### Accès aux services
+- **Frontend** : [http://localhost:3000](http://localhost:3000)
+- **Keycloak** : [http://localhost:8080](http://localhost:8080)
+- **H2 Console (Debug)** : Accessibles via les ports respectifs des services.
 
 ---
 
-## 🚀 Technologies utilisées
+## 🛠️ Technologies Utilisées
+- **Frontend** : React.js, Axios, Keycloak-js, CSS3 (Design Système sur mesure).
+- **Backend** : Spring Boot 3, Spring Cloud Gateway, Spring Security OAuth2.
+- **Base de données** : MySQL 8.0 & H2 (In-memory).
+- **Conteneurisation** : Docker & Docker Compose.
+- **Sécurité** : Keycloak (JWT, RBAC).
 
-- **React** – Front-End
-- **Spring Boot** – Back-End
-- **Keycloak** – Authentification et Autorisation
-- **OpenID Connect**
-- **JWT (JSON Web Token)**
-
----
-
-## ✅ Conclusion
-
-Ce projet permet de comprendre et d’appliquer les concepts fondamentaux
-de la sécurité des applications web modernes, notamment :
-
-- L’authentification déléguée
-- La gestion des rôles
-- L’authentification par token
-- La séparation des responsabilités entre les composants
-
----
